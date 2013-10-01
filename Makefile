@@ -1,13 +1,13 @@
-all: TJBuilder.jar
-
 touch = java -jar TJBuilder-bootstrap.jar touch
+
+all: TJBuilder.jar
 
 clean:
 	rm -rf bin TJBuilder.jar .java-src.lst
 
-.PHONY: _dir_
+.PHONY: all clean .FORCE
 
-src: _dir_
+src: .FORCE
 	${touch} -latest-within "$@" "$@"
 
 .java-src.lst: src
