@@ -34,6 +34,14 @@ public class TJBuilder
 		}
 	}
 	
+	protected static final String TOUCH_USAGE =
+		"Usage: tjb touch [<options>] <file> ...\n" +
+		"\n" +
+		"Options:\n" +
+		"  -latest-within <file/dir>\n" +
+		"\n" +
+		"If -latest-within isn't specified, the current time will be used.";
+	
 	public static int touchetteMain( Iterator<String> argi ) {
 		ArrayList<File> toBeTouched = new ArrayList<File>();
 		
@@ -47,8 +55,11 @@ public class TJBuilder
 			} else if( "-latest-within".equals(arg) ) {
 				mtime = Math.max(mtime, getLatestModified(new File(argi.next())));
 				timeSpecified = true;
+			} else if( "-?".equals(arg) || "-h".equals(arg) || "--help".equals(arg) ) {
+				System.out.println(TOUCH_USAGE);
+				return 0;
 			} else {
-				System.err.println("Error: unrecognized argument: '"+arg+"'");
+				System.err.println("Error: unrecognized argument: '"+arg+"'\n\n"+TOUCH_USAGE);
 				return 1;
 			}
 		}
@@ -77,6 +88,8 @@ public class TJBuilder
 		if( "touch".equals(subCommand) ) {
 			return touchetteMain(argi);
 		} else {
+			System.err.println("Unrecognized sub-command: '"+subCommand+"'");
+			System.err.println("Available sub-commands: touch");
 			return 1;
 		}
 	}
