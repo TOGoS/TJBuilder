@@ -1,12 +1,14 @@
 all: TJBuilder.jar
 
+touch = java -jar TJBuilder-bootstrap.jar touch
+
 clean:
 	rm -rf bin TJBuilder.jar .java-src.lst
 
 .PHONY: _dir_
 
 src: _dir_
-	java -jar TJBuilder-bootstrap.jar touch -latest-within "$@" "$@"
+	${touch} -latest-within "$@" "$@"
 
 .java-src.lst: src
 	find "$<" -name '*.java' >"$@"
@@ -14,7 +16,7 @@ src: _dir_
 bin: src .java-src.lst
 	mkdir -p bin
 	javac -d bin @.java-src.lst
-	touch bin
+	${touch} bin
 
 TJBuilder.jar: bin
 	jar cfe "$@" togos.tjbuilder.TJBuilder -C bin .
