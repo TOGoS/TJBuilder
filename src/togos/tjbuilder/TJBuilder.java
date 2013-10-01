@@ -22,16 +22,6 @@ public class TJBuilder
 		}
 	}
 	
-	protected static int touch( File f ) {
-		long lm = getLatestModification(f);
-		if( lm > Long.MIN_VALUE ) {
-			return 0;
-		} else {
-			System.err.println("Couldn't determine last modification time of "+f);
-			return 1;
-		}
-	}
-	
 	protected static final String TOUCH_USAGE =
 		"Usage: tjb touch [<options>] <file> ...\n" +
 		"\n" +
