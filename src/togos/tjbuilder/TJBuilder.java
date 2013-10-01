@@ -7,14 +7,12 @@ import java.util.Iterator;
 
 public class TJBuilder
 {
-	protected static long getLatestModified( File f ) {
+	protected static long getLatestModification( File f ) {
 		if( f.isDirectory() ) {
-			File[] entries = f.listFiles();
-			if( entries == null ) return Long.MIN_VALUE;
 			long t = f.lastModified();
-			for( File e : entries ) {
-				long et = getLatestModified(e);
-				if( et > t ) t = et;
+			File[] entries = f.listFiles();
+			if( entries != null ) for( File e : entries ) {
+				t = Math.max(t, getLatestModification(e));
 			}
 			return t;
 		} else if( f.exists() ) {
@@ -25,7 +23,7 @@ public class TJBuilder
 	}
 	
 	protected static int touch( File f ) {
-		long lm = getLatestModified(f);
+		long lm = getLatestModification(f);
 		if( lm > Long.MIN_VALUE ) {
 			return 0;
 		} else {
@@ -53,7 +51,7 @@ public class TJBuilder
 			if( !arg.startsWith("-") ) {
 				toBeTouched.add(new File(arg));
 			} else if( "-latest-within".equals(arg) ) {
-				mtime = Math.max(mtime, getLatestModified(new File(argi.next())));
+				mtime = Math.max(mtime, getLatestModification(new File(argi.next())));
 				timeSpecified = true;
 			} else if( "-?".equals(arg) || "-h".equals(arg) || "--help".equals(arg) ) {
 				System.out.println(TOUCH_USAGE);
