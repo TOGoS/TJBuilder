@@ -9,7 +9,7 @@ Assuming 'tjb' is aliased to 'java -jar TJBuilder.jar':
 	tjb touch -latest-within <dir> <dir>
 
 will update <dir>'s latest-modification timestamp to that of the most
-recent modification of all files and directoy contained within <dir>.
+recent modification of all files and directories contained within <dir>.
 
 You can use this for great effect within Makefiles:
 
