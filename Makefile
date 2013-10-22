@@ -8,7 +8,7 @@ clean:
 .PHONY: all clean .FORCE
 
 src: .FORCE
-	${touch} -latest-within "$@" "$@"
+	${touch} --latest-within="$@" "$@"
 
 .java-src.lst: src
 	find "$<" -name '*.java' >"$@"

@@ -26,9 +26,9 @@ public class TJBuilder
 		"Usage: tjb touch [<options>] <file> ...\n" +
 		"\n" +
 		"Options:\n" +
-		"  -latest-within <file/dir>\n" +
+		"  --latest-within=<file/dir>\n" +
 		"\n" +
-		"If -latest-within isn't specified, the current time will be used.";
+		"If --latest-within isn't specified, the current time will be used.";
 	
 	public static int touchetteMain( Iterator<String> argi ) {
 		ArrayList<File> toBeTouched = new ArrayList<File>();
@@ -42,6 +42,9 @@ public class TJBuilder
 				toBeTouched.add(new File(arg));
 			} else if( "-latest-within".equals(arg) ) {
 				mtime = Math.max(mtime, getLatestModification(new File(argi.next())));
+				timeSpecified = true;
+			} else if( arg.startsWith("--latest-within=") ) {
+				mtime = Math.max(mtime, getLatestModification(new File(arg.substring(16))));
 				timeSpecified = true;
 			} else if( "-?".equals(arg) || "-h".equals(arg) || "--help".equals(arg) ) {
 				System.out.println(TOUCH_USAGE);
