@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 public class TJBuilder
 {
-	public static int main( Iterator<String> argi ) {
+	public static int main( Iterator<String> argi ) throws Exception {
 		if( !argi.hasNext() ) {
 			System.err.println("Need to specify a sub-command.");
 			return 1;
@@ -14,6 +14,8 @@ public class TJBuilder
 		String subCommand = argi.next();
 		if( "touch".equals(subCommand) ) {
 			return Touch.main(argi);
+		} else if( "update-libraries".equals(subCommand) ) {
+			return UpdateLibraries.main(argi);
 		} else {
 			System.err.println("Unrecognized sub-command: '"+subCommand+"'");
 			System.err.println("Available sub-commands: touch");
@@ -21,7 +23,7 @@ public class TJBuilder
 		}
 	}
 	
-	public static void main( String[] args ) {
+	public static void main( String[] args ) throws Exception {
 		System.exit( main( Arrays.asList(args).iterator() ) );
 	}
 }
