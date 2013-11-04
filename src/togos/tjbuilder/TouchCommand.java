@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class Touch
+public class TouchCommand
 {
 	protected static long getLatestModification( File f ) {
 		if( f.isDirectory() ) {
