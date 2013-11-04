@@ -21,7 +21,7 @@ public class Touch
 		}
 	}
 	
-	protected static final String TOUCH_USAGE =
+	protected static final String USAGE =
 		"Usage: tjb touch [<options>] <file> ...\n" +
 		"\n" +
 		"Options:\n" +
@@ -46,10 +46,10 @@ public class Touch
 				mtime = Math.max(mtime, getLatestModification(new File(arg.substring(16))));
 				timeSpecified = true;
 			} else if( "-?".equals(arg) || "-h".equals(arg) || "--help".equals(arg) ) {
-				System.out.println(TOUCH_USAGE);
+				System.out.println(USAGE);
 				return 0;
 			} else {
-				System.err.println("Error: unrecognized argument: '"+arg+"'\n\n"+TOUCH_USAGE);
+				System.err.println("Error: unrecognized argument: '"+arg+"'\n\n"+USAGE);
 				return 1;
 			}
 		}

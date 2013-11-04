@@ -13,13 +13,16 @@ import java.util.Map;
 
 public class UpdateLibraries
 {
-	protected static final String TOUCH_USAGE =
-		"Usage: tjb touch [<options>] <file> ...\n" +
+	protected static final String USAGE =
+		"Usage: tjb update-libraries <libraries-dir>\n" +
 		"\n" +
-		"Options:\n" +
-		"  -latest-within <file/dir>\n" +
+		"Will install libraries with versions given in\n" +
+		"<libraries-dir>-refs/<library-name> and repository URLs from\n" +
+		"<libraries-dir>-repositories/<library-name>.\n" +
 		"\n" +
-		"If -latest-within isn't specified, the current time will be used.";
+		"Refs should be text files containing a single hex-encoded Git commit hash.\n" +
+		"Repository files contain one repository per line in the form \"<name> <url>\".\n" +
+		"Only the first one will be used for automatic updating.";
 	
 	protected static int error( String message ) {
 		System.err.println("Error: "+message);
@@ -54,17 +57,26 @@ public class UpdateLibraries
 		return t;
 	}
 	
-	protected static void sys(File workingDir, String...command ) throws InterruptedException, IOException {
-		System.out.println(workingDir + "$ " + toCmdLine(command));
+	protected static int sys(File workingDir, boolean requireZeroStatus, String...command ) throws InterruptedException, IOException {
+		// System.out.println(workingDir + "$ " + toCmdLine(command));
 		Process proc = new ProcessBuilder().directory(workingDir).command(command).start();
 		Thread t1 = pipe( proc.getInputStream(), System.out );
 		Thread t2 = pipe( proc.getErrorStream(), System.err );
 		int status = proc.waitFor();
 		t1.join();
 		t2.join();
-		if( status != 0 ) {
+		if( requireZeroStatus && status != 0 ) {
 			throw new RuntimeException("Command returned "+status+": "+toCmdLine(command));
 		}
+		return status;
+	}
+	
+	protected static void sys(File workingDir, String...command ) throws InterruptedException, IOException {
+		sys( workingDir, true, command );
+	}
+	
+	protected static int sysIgnore(File workingDir, String...command ) throws InterruptedException, IOException {
+		return sys( workingDir, false, command );
 	}
 	
 	protected static String[] flatten( Object...args ) {
@@ -81,10 +93,10 @@ public class UpdateLibraries
 		File gitDir = new File(libDir, ".git");
 		if( !gitDir.exists() ) sys( libDir, "git", "init" );
 		for( Repository repo : lib.repositories ) {
-			sys( libDir, "git", "remote", "rm", repo.name );
+			sysIgnore( libDir, "git", "remote", "rm", repo.name );
 			sys( libDir, "git", "remote", "add", repo.name, repo.uri );
 		}
-		sys( libDir, "git", "fetch", "--multiple", lib.repositories.get(0).name );
+		sys( libDir, "git", "fetch", lib.repositories.get(0).name );
 		sys( libDir, "git", "merge", lib.headRef );
 	}
 	
@@ -97,7 +109,7 @@ public class UpdateLibraries
 				if( libsDir != null ) return error("Library directory already given");
 				libsDir = new File(arg);
 			} else {
-				return error("Unrecognized argument: '"+arg+"'\n\n"+TOUCH_USAGE);
+				return error("Unrecognized argument: '"+arg+"'\n\n"+USAGE);
 			}
 		}
 		
