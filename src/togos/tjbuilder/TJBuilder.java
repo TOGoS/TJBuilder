@@ -5,6 +5,10 @@ import java.util.Iterator;
 
 public class TJBuilder
 {
+	public static boolean isHelpRequestArgument( String arg ) {
+		return "-?".equals(arg) || "-h".equals(arg) || "--help".equals(arg);
+	}
+	
 	public static int main( Iterator<String> argi ) throws Exception {
 		if( !argi.hasNext() ) {
 			System.err.println("Need to specify a sub-command.");

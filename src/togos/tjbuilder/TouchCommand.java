@@ -1,5 +1,7 @@
 package togos.tjbuilder;
 
+import static togos.tjbuilder.TJBuilder.isHelpRequestArgument;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -45,7 +47,7 @@ public class TouchCommand
 			} else if( arg.startsWith("--latest-within=") ) {
 				mtime = Math.max(mtime, getLatestModification(new File(arg.substring(16))));
 				timeSpecified = true;
-			} else if( "-?".equals(arg) || "-h".equals(arg) || "--help".equals(arg) ) {
+			} else if( isHelpRequestArgument(arg) ) {
 				System.out.println(USAGE);
 				return 0;
 			} else {

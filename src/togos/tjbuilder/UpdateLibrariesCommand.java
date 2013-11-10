@@ -1,5 +1,7 @@
 package togos.tjbuilder;
 
+import static togos.tjbuilder.TJBuilder.isHelpRequestArgument;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,7 +14,10 @@ import java.util.Map;
 public class UpdateLibrariesCommand
 {
 	protected static final String USAGE =
-		"Usage: tjb update-libraries <libraries-dir>\n" +
+		"Usage: tjb update-libraries [<options>] <libraries-dir>\n" +
+		"\n" +
+		"Options:\n" +
+		"  --git=<path> ; path to 'git' executable\n" +
 		"\n" +
 		"Will install libraries with versions given in\n" +
 		"<libraries-dir>-refs/<library-name> and repository URLs from\n" +
@@ -22,6 +27,7 @@ public class UpdateLibrariesCommand
 		"Repository files contain one repository per line in the form \"<name> <url>\".\n" +
 		"Only the first one will be used for automatic updating.";
 	
+	String gitCommandPath = "git";
 	CommandRunner requiredCommandRunner = new CommandRunner(true);
 	CommandRunner whateverCommandRunner = new CommandRunner(false);
 	
@@ -37,13 +43,13 @@ public class UpdateLibrariesCommand
 	protected void updateLibrary( File libDir, LibraryVersion lib ) throws InterruptedException, IOException {
 		if( !libDir.exists() ) libDir.mkdirs();
 		File gitDir = new File(libDir, ".git");
-		if( !gitDir.exists() ) requiredCommandRunner.sys( libDir, "git", "init" );
+		if( !gitDir.exists() ) requiredCommandRunner.sys( libDir, gitCommandPath, "init" );
 		for( Repository repo : lib.repositories ) {
-			whateverCommandRunner.sys( libDir, "git", "remote", "rm", repo.name );
-			requiredCommandRunner.sys( libDir, "git", "remote", "add", repo.name, repo.uri );
+			whateverCommandRunner.sys( libDir, gitCommandPath, "remote", "rm", repo.name );
+			requiredCommandRunner.sys( libDir, gitCommandPath, "remote", "add", repo.name, repo.uri );
 		}
-		requiredCommandRunner.sys( libDir, "git", "fetch", lib.repositories.get(0).name );
-		requiredCommandRunner.sys( libDir, "git", "merge", lib.headRef );
+		requiredCommandRunner.sys( libDir, gitCommandPath, "fetch", lib.repositories.get(0).name );
+		requiredCommandRunner.sys( libDir, gitCommandPath, "merge", lib.headRef );
 	}
 	
 	protected static int error( String message ) {
@@ -53,12 +59,18 @@ public class UpdateLibrariesCommand
 	
 	public static int main( Iterator<String> argi ) throws InterruptedException, IOException {
 		File libsDir = null;
+		String gitPath = null;
 		
 		while( argi.hasNext() ) {
 			String arg = argi.next();
-			if( !arg.startsWith("-") ) {
+			if( arg.startsWith("--git=") ) {
+				gitPath = arg.substring(6);
+			} else if( !arg.startsWith("-") ) {
 				if( libsDir != null ) return error("Library directory already given");
 				libsDir = new File(arg);
+			} else if( isHelpRequestArgument(arg) ) {
+				System.out.println(USAGE);
+				return 0;
 			} else {
 				return error("Unrecognized argument: '"+arg+"'\n\n"+USAGE);
 			}
@@ -92,6 +104,7 @@ public class UpdateLibrariesCommand
 		}
 		
 		UpdateLibrariesCommand ulc = new UpdateLibrariesCommand();
+		if( gitPath != null ) ulc.gitCommandPath = gitPath;
 		
 		for( Map.Entry<String,LibraryVersion> libE : libs.entrySet() ) {
 			File libDir = new File(libsDir, libE.getKey());
