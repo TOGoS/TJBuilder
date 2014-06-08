@@ -22,7 +22,7 @@ public class TJBuilder
 			return UpdateLibrariesCommand.main(argi);
 		} else {
 			System.err.println("Unrecognized sub-command: '"+subCommand+"'");
-			System.err.println("Available sub-commands: touch");
+			System.err.println("Available sub-commands: touch, update-libraries");
 			return 1;
 		}
 	}
