@@ -19,7 +19,9 @@ public class TJBuilder
 		if( "touch".equals(subCommand) ) {
 			return TouchCommand.main(argi);
 		} else if( "update-libraries".equals(subCommand) ) {
-			return UpdateLibrariesCommand.main(argi);
+			return UpdateLibrariesCommand.main(argi, UpdateLibrariesCommand.Mode.RUN);
+		} else if( "generate-library-update-script".equals(subCommand) ) {
+			return UpdateLibrariesCommand.main(argi, UpdateLibrariesCommand.Mode.GENERATE_SCRIPT);
 		} else {
 			System.err.println("Unrecognized sub-command: '"+subCommand+"'");
 			System.err.println("Available sub-commands: touch, update-libraries");

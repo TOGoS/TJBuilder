@@ -28,8 +28,8 @@ public class UpdateLibrariesCommand
 		"Only the first one will be used for automatic updating.";
 	
 	String gitCommandPath = "git";
-	CommandRunner requiredCommandRunner = new CommandRunner(true);
-	CommandRunner whateverCommandRunner = new CommandRunner(false);
+	CommandRunner requiredCommandRunner = new ActualCommandRunner(true);
+	CommandRunner whateverCommandRunner = new ActualCommandRunner(false);
 	
 	protected String[] flatten( Object...args ) {
 		ArrayList<String> res = new ArrayList<String>();
@@ -41,7 +41,7 @@ public class UpdateLibrariesCommand
 	}
 	
 	protected void updateLibrary( File libDir, LibraryVersion lib ) throws InterruptedException, IOException {
-		if( !libDir.exists() ) libDir.mkdirs();
+		if( !libDir.exists() ) whateverCommandRunner.mkdirs(libDir);
 		File gitDir = new File(libDir, ".git");
 		if( !gitDir.exists() ) requiredCommandRunner.sys( libDir, gitCommandPath, "init" );
 		for( Repository repo : lib.repositories ) {
@@ -57,7 +57,9 @@ public class UpdateLibrariesCommand
 		return 1;
 	}
 	
-	public static int main( Iterator<String> argi ) throws InterruptedException, IOException {
+	public static enum Mode { RUN, GENERATE_SCRIPT } 
+	
+	public static int main( Iterator<String> argi, Mode mode ) throws InterruptedException, IOException {
 		File libsDir = null;
 		String gitPath = null;
 		
@@ -105,6 +107,25 @@ public class UpdateLibrariesCommand
 		
 		UpdateLibrariesCommand ulc = new UpdateLibrariesCommand();
 		if( gitPath != null ) ulc.gitCommandPath = gitPath;
+		if( mode == Mode.GENERATE_SCRIPT ) {
+			ulc.requiredCommandRunner = ulc.whateverCommandRunner = new CommandRunner() {
+				File cwd = null;
+				
+				@Override public void mkdirs(File dir) {
+					System.out.println("mkdir -p \""+dir.getAbsolutePath()+"\"");
+				}
+				
+				@Override public int sys(File workingDir, String... command) {
+					boolean needCd = cwd == null ? workingDir != null : !cwd.equals(workingDir);
+					if( needCd ) {
+						System.out.println("cd \""+workingDir+"\"");
+						cwd = workingDir;
+					}
+					System.out.println(ActualCommandRunner.toCmdLine(command));
+					return 0;
+				}
+			};
+		}
 		
 		for( Map.Entry<String,LibraryVersion> libE : libs.entrySet() ) {
 			File libDir = new File(libsDir, libE.getKey());
